@@ -71,36 +71,44 @@ int main(){
         // If we've gone past GO.
         if(moves % sq_total <= 40){
             moves = moves % sq_total;
+            board[moves]++;
         }
         // Check for community chest.
         if(moves == 2 || moves == 17 || moves == 33){
             // Get out of jail free card.
+            board[moves]++;
             if(community_chest() == -1){
                 GOJ = true;
             }
             // Community chest cards that move you to different square.
             else if(community_chest() != 0){
                 moves = community_chest();
+                board[moves]++;
             }
         }
         // Check for chance cards.
         if(moves == 7 || moves == 22){
+            board[moves]++;
             if(chance_card(moves) == -1){
                 GOJ = true;
             }
             else{
                 moves = chance_card(moves);
+                board[moves]++;
             }
         }
         // If you land on 'Go to Jail'.
         if(moves == 30){
+            board[moves]++;
             if(GOJ){
-                moves = 10;
+
                 GOJ = false;
             }
             else{
                 jail();
             }
+            moves = 10;
+            board[moves]++;
         }
     }
     return 0;
