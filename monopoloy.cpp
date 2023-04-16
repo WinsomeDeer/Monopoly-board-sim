@@ -8,7 +8,6 @@
 #include <unordered_map>
 #include <time.h>
 
-// Function to calculate dice throws and keep track of number of doubles.
 int dice_throw(int& no_doubles){
     int dice1 = (std::rand() % 6 + 1), dice2 = (std::rand() % 6 + 1);
     if(dice1 == dice2){
@@ -18,8 +17,10 @@ int dice_throw(int& no_doubles){
             return -1;
         }
     }
+    if(dice1 != dice2 && no_doubles > 0){
+        no_doubles = 0;
+    }
     return dice1 + dice2;
-
 }
 
 // Jail Function.
