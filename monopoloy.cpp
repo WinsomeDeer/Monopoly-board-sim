@@ -14,16 +14,12 @@ int dice_throw(int& no_doubles){
     if(dice1 == dice2){
         no_doubles++;
         if(no_doubles == 3){
+            no_doubles = 0;
             return -1;
         }
-        else{
-            no_doubles = 0;
-            return dice1 + dice2;
-        }
     }
-    else{
-        return dice1 + dice2;
-    }
+    return dice1 + dice2;
+
 }
 
 // Jail Function.
