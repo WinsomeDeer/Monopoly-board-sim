@@ -50,8 +50,9 @@ int community_chest(){
 int chance_card(int& moves){
     int card = (rand() % 16) + 1;
     std::unordered_map<int, int> mp
-        = {{1,0},{2,24},{3,39},{4,11},{5, std::min({abs(5-moves), abs(15-moves), abs(25-moves), abs(35-moves)})},
-            {6,std::min({abs(12-moves), abs(28-moves)})}, {8,-1}, {9, moves-3}, {10, 10}, {13,5}, {14, 0}};
+        = {{1,0},{2,24},{3,39},{4,11},
+            {5, std::min({abs(5-moves), abs(15-moves), abs(25-moves), abs(35-moves)})},
+                {6, std::min(abs(12-moves), abs(28-moves))}, {8,-1}, {9, moves-3}, {10, 10}, {13,5}, {14, 0}};
     if(mp.find(card) != mp.end()){
         return mp[card];
     }
