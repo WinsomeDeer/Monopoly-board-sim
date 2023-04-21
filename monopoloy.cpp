@@ -8,21 +8,6 @@
 #include <unordered_map>
 #include <time.h>
 
-int dice_throw(int& no_doubles){
-    int dice1 = (std::rand() % 6 + 1), dice2 = (std::rand() % 6 + 1);
-    if(dice1 == dice2){
-        no_doubles++;
-        if(no_doubles == 3){
-            no_doubles = 0;
-            return -1;
-        }
-    }
-    if(dice1 != dice2 && no_doubles > 0){
-        no_doubles = 0;
-    }
-    return dice1 + dice2;
-}
-
 // Jail Function.
 int jail(){
     for(int i = 0; i < 3; i++){
@@ -33,79 +18,126 @@ int jail(){
     }
     return 0;
 }
-
-// Community chest function.
-int community_chest(){
-    int card = (rand() % 16) + 1;
-    std::unordered_map<int, int> mp = {{1,0}, {5,-1}, {6,10}};
-    if(mp.find(card) != mp.end()){
-        return mp[card];
-    }
-    else{
-        return 0;
-    }
-}
-
-// Chance card function.
-int chance_card(int& moves){
-    int card = (rand() % 16) + 1;
-    std::unordered_map<int, int> mp
-        = {{1,0},{2,24},{3,39},{4,11},
-            {5, std::min({abs(5-moves), abs(15-moves), abs(25-moves), abs(35-moves)})},
-                {6, std::min(abs(12-moves), abs(28-moves))}, {8,-1}, {9, moves-3}, {10, 10}, {13,5}, {14, 0}};
-    if(mp.find(card) != mp.end()){
-        return mp[card];
-    }
-    else{
-        return 0;
-    }
-}
-
 // Main loop to count the squares landed on.
 int main(){
     srand(time(NULL));
-    int i = 0, sq_total = 40, moves = 0, no_of_doubles = 0, move;
+    int i = 0;
+    int sq_total = 40;
+    int moves = 0;
+    int no_of_doubles = 0;
+    int move;
+    int dice1, dice2;
+    int community_chest_card, chance_card;
     bool GOJ = false, jailed = false;
     std::vector<int> board(sq_total, 0);
-    while(i++ <= 10000){
-        move = dice_throw(no_of_doubles);
-        // Check if we have rolled three doubles.
-        if(move == -1){
-            moves = 10;
-            jail();
+    while(i++ <= 100000){
+        // Roll the dice.
+        dice1 = (rand()%6)+1, dice2 = (rand()%6)+1;
+        if(dice1 == dice2){
+            no_of_doubles++;
+            // Check if we have rolled three doubles.
+            if(no_of_doubles == 3){
+                moves = 10;
+                jail();
+            }
+            else{
+                moves += dice1 + dice2;
+            }
+        }
+        // Reset doubles if needed.
+        else if(dice1 != dice2 && no_of_doubles > 0){
+            no_of_doubles = 0;
+            moves += dice1 + dice2;
         }
         else{
-            moves += move;
+            moves += dice1 + dice2;
         }
         board[moves]++;
         // If we've gone past GO.
-        if(moves % sq_total <= 40){
+        if(moves % sq_total <= 39){
             moves = moves % sq_total;
             board[moves]++;
         }
         // Check for community chest.
         if(moves == 2 || moves == 17 || moves == 33){
-            // Get out of jail free card.
-            board[moves]++;
-            if(community_chest() == -1){
-                GOJ = true;
+            community_chest_card = (rand()%16) + 1;
+            switch(community_chest_card){
+                // Advance to GO.
+                case 1:
+                    moves = 0;
+                    break;
+                // Get out of jail free card.
+                case 2:
+                    GOJ = true;
+                    break;
+                // Go to jail. 
+                case 3:
+                    moves = 10;
+                    jail();
+                    break;
             }
-            // Community chest cards that move you to different square.
-            else if(community_chest() != 0){
-                moves = community_chest();
-                board[moves]++;
-            }
+        board[moves]++;
         }
         // Check for chance cards.
-        if(moves == 7 || moves == 22){
+        if(moves == 7 || moves == 22 || moves == 36){
+            chance_card = (rand()%16) + 1;
+            switch(chance_card){
+                // Advance to GO.
+                case 1:
+                    moves = 0;
+                    break;
+                // Advance to Trafalgar square.
+                case 2:
+                    moves = 24;
+                    break;
+                // Advance to Pall Mall.
+                case 3:
+                    moves = 11;
+                    break;
+                // Advance to nearest utility.
+                case 4:
+                    if(moves == 22){
+                        moves = 28;
+                    }
+                    else{
+                        moves = 12;
+                    }
+                    break;
+                // Advance to nearest station.
+                case 5:
+                    if(moves == 7){
+                        moves = 15;
+                    }
+                    else if(moves == 22){
+                        moves = 25;
+                    }
+                    else{
+                        moves = 36;
+                    }
+                    break;
+                // Get out of jail free card.
+                case 6:
+                    GOJ = true;
+                    break;
+                // Go back 3 spaces.
+                case 7:
+                    moves -= 3;
+                    break;
+                // Go to Jail.
+                case 8:
+                    moves = 10;
+                    jail();
+                    break;
+                // Go to Kings Cross station.
+                case 9:
+                    moves = 5;
+                    break;
+                // Advance to Mayfair.
+                case 10:
+                    moves = 39;
+                    break;
+            }
             board[moves]++;
-            if(chance_card(moves) == -1){
-                GOJ = true;
-            }
-            else{
-                moves = chance_card(moves);
-                board[moves]++;
-            }
         }
         // If you land on 'Go to Jail'.
         if(moves == 30){
